@@ -132,7 +132,7 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
                                 'have installed pyDNS python package')
             hostname = email[email.find('@') + 1:]
             mx_hosts = get_mx_ip(hostname)
-            if mx_hosts is None:
+            if mx_hosts is None or len(mx_hosts) == 0:
                 return False
             for mx in mx_hosts:
                 try:
@@ -147,7 +147,7 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
                         except smtplib.SMTPServerDisconnected:
                             pass
                         return True
-                    status, _ = smtp.helo()
+                    status, _ = smtp.ehlo()
                     if status != 250:
                         smtp.quit()
                         if debug:
@@ -158,6 +158,9 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
                     if status == 250:
                         smtp.quit()
                         return True
+                    if 500 <= status < 600:
+                        smtp.quit()
+                        return False
                     if debug:
                         logger.debug(u'%s answer: %s - %s', mx[1], status, _)
                     smtp.quit()
@@ -177,33 +180,37 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
     return True
 
 if __name__ == "__main__":
-    import time
-    while True:
-        email = raw_input('Enter email for validation: ')
-
-        mx = raw_input('Validate MX record? [yN] ')
-        if mx.strip().lower() == 'y':
-            mx = True
-        else:
-            mx = False
-
-        validate = raw_input('Try to contact server for address validation? [yN] ')
-        if validate.strip().lower() == 'y':
-            validate = True
-        else:
-            validate = False
-
-        logging.basicConfig()
-
-        result = validate_email(email, mx, validate, debug=True, smtp_timeout=1)
-        if result:
-            print("Valid!")
-        elif result is None:
-            print("I'm not sure.")
-        else:
-            print("Invalid!")
-
-        time.sleep(1)
+    hostname = "gmail.com"
+    print hostname
+    print get_mx_ip(hostname)
+    print validate_email("test@" + hostname, verify=True)
+    # import time
+    # while True:
+    #     email = raw_input('Enter email for validation: ')
+    #
+    #     mx = raw_input('Validate MX record? [yN] ')
+    #     if mx.strip().lower() == 'y':
+    #         mx = True
+    #     else:
+    #         mx = False
+    #
+    #     validate = raw_input('Try to contact server for address validation? [yN] ')
+    #     if validate.strip().lower() == 'y':
+    #         validate = True
+    #     else:
+    #         validate = False
+    #
+    #     logging.basicConfig()
+    #
+    #     result = validate_email(email, mx, validate, debug=True, smtp_timeout=1)
+    #     if result:
+    #         print("Valid!")
+    #     elif result is None:
+    #         print("I'm not sure.")
+    #     else:
+    #         print("Invalid!")
+    #
+    #     time.sleep(1)
 
 
 # import sys
