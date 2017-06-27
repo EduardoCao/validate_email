@@ -1,5 +1,7 @@
 参考资料：
+========
 1.如何验证 Email 地址：SMTP 协议入门教程 阮一峰 http://www.ruanyifeng.com/blog/2017/06/smtp-protocol.html?utm_source=tuicool&utm_medium=referral
+
 2.【如何校验邮件地址的有效性】第三篇 ：原理二 木子耗2009 http://blog.csdn.net/u011628250/article/details/72909796
 
 ==============
