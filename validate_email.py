@@ -16,7 +16,8 @@
 # This implementation aims to be faithful to the RFC, with the
 # exception of a circular definition (see comments below), and
 # with the omission of the pattern components marked as "obsolete".
-
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 import re
 import smtplib
 import logging
@@ -134,6 +135,7 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
             mx_hosts = get_mx_ip(hostname)
             if mx_hosts is None or len(mx_hosts) == 0:
                 return False
+            false_cnt = 0
             for mx in mx_hosts:
                 try:
                     if not verify and mx[1] in MX_CHECK_CACHE:
@@ -159,8 +161,10 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
                         smtp.quit()
                         return True
                     if 500 <= status < 600:
-                        smtp.quit()
-                        return False
+                        false_cnt += 1
+                        if false_cnt == len(mx_hosts):
+                            smtp.quit()
+                            return False
                     if debug:
                         logger.debug(u'%s answer: %s - %s', mx[1], status, _)
                     smtp.quit()
@@ -180,9 +184,9 @@ def validate_email(email, check_mx=False, verify=False, debug=False, smtp_timeou
     return True
 
 if __name__ == "__main__":
-    hostname = "gmail.com"
+    hostname = "qq.com"
     print hostname
-    print get_mx_ip(hostname)
+    # print get_mx_ip(hostname)
     print validate_email("test@" + hostname, verify=True)
     # import time
     # while True:
